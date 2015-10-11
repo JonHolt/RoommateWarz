@@ -2,14 +2,14 @@
 using System.Collections;
 
 public class BulletBreak : MonoBehaviour {
+    public int MAX_HITS = 3;
+
     private int hits = 0;
 
     void OnCollisionEnter2D(Collision2D collision) {
-        if(collision.collider.tag != "Bullet") {
-            ++hits;
-            if(hits > 5) {
-                Destroy(this.gameObject);
-            }
+        ++hits;
+        if(hits > MAX_HITS) {
+            Destroy(this.gameObject);
         }
     }
 }

@@ -2,26 +2,26 @@
 using System.Collections;
 
 public class Follow : MonoBehaviour {
-    public Transform following;
-    public float buffer = 5;
+    public Camera cam;
+    public float MINIMUM_SIZE = 2.5f;
+    public Transform[] following;
+    public float buffer = 2;
 	
 	// Update is called once per frame
 	void Update () {
-        float xDiff = transform.position.x - following.position.x,
-              yDiff = transform.position.y - following.position.y;
-        if(xDiff < -buffer) {
-            xDiff = -buffer;
-        }
-        else if(xDiff > buffer) {
-            xDiff = buffer;
+        float minX = int.MaxValue, minY = int.MaxValue, maxX = int.MinValue, maxY = int.MinValue;
+        //find the boundaries
+        foreach (Transform t in following) {
+            if (t == null)
+                continue;
+            Vector2 pos = t.position;
+            minX = Mathf.Min(pos.x, minX);
+            maxX = Mathf.Max(pos.x, maxX);
+            minY = Mathf.Min(pos.y, minY);
+            maxY = Mathf.Max(pos.y, maxY);
         }
 
-        if(yDiff < -buffer) {
-            yDiff = -buffer;
-        }
-        if(yDiff > buffer) {
-            yDiff = buffer;
-        }
-        transform.position = new Vector3(following.position.x + xDiff, following.position.y + yDiff, -10);
+        cam.orthographicSize = Mathf.Max(Mathf.Max(maxX - minX, maxY - minY) /2 + buffer, MINIMUM_SIZE);
+        transform.position = new Vector3((maxX + minX)/2,(maxY + minY)/2, -10);
     }
 }
