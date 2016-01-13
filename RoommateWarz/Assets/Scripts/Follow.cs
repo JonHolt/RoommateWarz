@@ -5,6 +5,7 @@ public class Follow : MonoBehaviour {
     public Camera cam;
     public float MINIMUM_SIZE = 2.5f;
     public Transform[] following;
+    private float buffer = 2f;
 	
 	// Update is called once per frame
 	void Update () {
@@ -20,8 +21,19 @@ public class Follow : MonoBehaviour {
             maxY = Mathf.Max(pos.y, maxY);
         }
 
-        float dist = Mathf.Max(maxX - minX, maxY - minY);
-        cam.orthographicSize = Mathf.Max( dist/4, MINIMUM_SIZE);
+        float width = maxX - minX;
+        float widthHeight = width / cam.aspect;
+        float height = maxY - minY;
+        if(widthHeight > height)
+        {
+            cam.orthographicSize = Mathf.Max((widthHeight / cam.aspect) + buffer , MINIMUM_SIZE);
+        }
+        else
+        {
+            cam.orthographicSize = Mathf.Max((height/2) + buffer, MINIMUM_SIZE);
+        }
+
+        
         transform.position = new Vector3((maxX + minX)/2,(maxY + minY)/2, -10);
     }
 }

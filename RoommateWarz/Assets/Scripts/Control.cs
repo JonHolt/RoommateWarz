@@ -103,9 +103,14 @@ public class Control : MonoBehaviour {
             if(speed > 5) {
                 health -= speed;
                 if(health <= 0) {
-                    Destroy(gameObject);
+                    gameObject.SetActive(false);
                 }
             }
         }
+    }
+
+    public void ResetHealth()
+    {
+        health = 100;
     }
 }
