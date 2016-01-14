@@ -11,6 +11,7 @@ public class Control : MonoBehaviour {
     private bool didFire = false;
     private Animator anim;
 	private Transform reticlePosition;
+    public int cooldown;
 
     void Awake()
     {
@@ -87,7 +88,7 @@ public class Control : MonoBehaviour {
 
         //Fireing
         float fire = Input.GetAxis("Fire"+playerNum);
-        if (fire > 0 && !didFire) {
+        if (fire > 0 && (!didFire || cooldown == 0)) {
             didFire = true;
 
             float aimX = Input.GetAxis("AimHorizontal" + playerNum),
@@ -108,9 +109,14 @@ public class Control : MonoBehaviour {
             Rigidbody2D bulletBody = bullet.GetComponent<Rigidbody2D>();
             bulletBody.velocity = new Vector2(aimX * speed * 2, aimY * speed * 2) + body.velocity;
             bulletBody.angularVelocity = 15;
+            cooldown = 20;
         }
         else if (fire == 0 && didFire) {
             didFire = false;
+        }
+        else if (didFire && cooldown > 0)
+        {
+            --cooldown;
         }
     }
 

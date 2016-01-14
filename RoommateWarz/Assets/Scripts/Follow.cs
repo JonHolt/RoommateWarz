@@ -26,7 +26,7 @@ public class Follow : MonoBehaviour {
         float height = maxY - minY;
         if(widthHeight > height)
         {
-            cam.orthographicSize = Mathf.Max((widthHeight / cam.aspect) + buffer , MINIMUM_SIZE);
+            cam.orthographicSize = Mathf.Max((widthHeight / 2) + buffer , MINIMUM_SIZE);
         }
         else
         {
