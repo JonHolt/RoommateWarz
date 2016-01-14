@@ -10,11 +10,30 @@ public class Control : MonoBehaviour {
     private float health = 100;
     private bool didFire = false;
     private Animator anim;
+	private Transform reticlePosition;
 
     void Awake()
     {
         anim = GetComponent<Animator>();
+		foreach (Transform child in transform) {
+			if (child.name == "Reticle") {
+				reticlePosition = child;
+				break;
+			}
+		}
     }
+
+	void Update() {
+		float x = transform.position.x,
+			  y = transform.position.y,
+			  aimX = Input.GetAxis("AimHorizontal" + playerNum),
+			  aimY = Input.GetAxis("AimVertical" + playerNum);
+		Vector2 aimRadius = new Vector2(aimX, aimY);
+		aimRadius.Normalize();
+
+		// Set the reticle position
+		reticlePosition.position = new Vector3(x + aimRadius.x, y + aimRadius.y, reticlePosition.position.z);
+	}
 
     void FixedUpdate() {
         float x = Input.GetAxis("Horizontal"+playerNum),
@@ -73,9 +92,9 @@ public class Control : MonoBehaviour {
 
             float aimX = Input.GetAxis("AimHorizontal" + playerNum),
                   aimY = Input.GetAxis("AimVertical" + playerNum);
-            
-            //don't fire without direction
-            if (aimX == 0 && aimY == 0) {
+
+			//don't fire without direction
+			if (aimX == 0 && aimY == 0) {
                 return;
             }
 
