@@ -2,19 +2,21 @@
 using System.Collections;
 
 public class Control : MonoBehaviour {
-    public Rigidbody2D body;
-    public float speed = 5;
-    private float spawndist = .3f;
-    public GameObject bulletType;
-    public int playerNum;
-    private float health = 100;
-    private bool didFire = false;
-    private Animator anim;
-	private Transform reticlePosition;
-    public int cooldown;
+	private const float MAX_HEALTH = 100f;
+	private Animator    anim;
+	private bool        didFire = false;
+	private float       health;
+	private Transform   reticlePosition;
+	private float       spawndist = .3f;
 
-    void Awake()
-    {
+	public Rigidbody2D body;
+	public GameObject  bulletType;
+	public int         cooldown;
+	public int         playerNum;
+	public float       speed = 5;
+
+    void Awake() {
+		health = MAX_HEALTH;
         anim = GetComponent<Animator>();
 		foreach (Transform child in transform) {
 			if (child.name == "Reticle") {
