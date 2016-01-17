@@ -2,6 +2,10 @@
 using System.Collections;
 
 public class Control : MonoBehaviour {
+	private const float HEALTH_BAR_HEIGHT = 5f;
+	private const float HEALTH_BAR_WIDTH = 100f;
+	private const float HEALTH_BAR_HORIZONTAL_OFFSET = 50f;
+	private const float HEALTH_BAR_VERTICAL_OFFSET = 0.6f;
 	private const float MAX_HEALTH = 100f;
 	private Animator    anim;
 	private bool        didFire = false;
@@ -25,6 +29,22 @@ public class Control : MonoBehaviour {
 			}
 		}
     }
+
+	void OnGUI() {
+		Vector3 worldPosition = new Vector3(transform.position.x, transform.position.y + HEALTH_BAR_VERTICAL_OFFSET, transform.position.z);
+		Vector3 screenPosition = Camera.main.WorldToScreenPoint(worldPosition);
+		float green = health / MAX_HEALTH;
+		float red = 1f - green;
+		float screenOffset = 2.7f / Camera.main.orthographicSize;
+        GUI.color = new Color(red, green, 0f);
+		Rect healthBarPosition = new Rect() {
+			x = screenPosition.x - HEALTH_BAR_HORIZONTAL_OFFSET * screenOffset,
+			y = Screen.height - screenPosition.y - HEALTH_BAR_VERTICAL_OFFSET * screenOffset,
+			width = HEALTH_BAR_WIDTH * screenOffset,
+			height = 0
+		};
+		GUI.HorizontalScrollbar(healthBarPosition, 0, health, 0, MAX_HEALTH);
+	}
 
 	void Update() {
 		float x = transform.position.x,
@@ -125,7 +145,7 @@ public class Control : MonoBehaviour {
     void OnCollisionEnter2D(Collision2D collision) {
         Collider2D collider = collision.collider;
         string[] tags = collider.tag.Split(':');
-        if (tags.Length > 1 && tags[0] == "Bullet" && tags[1] != playerNum.ToString()) {
+        if (tags.Length > 1 && tags[0] == "Bullet"/* && tags[1] != playerNum.ToString()*/) {
             float speed = collider.GetComponent<Rigidbody2D>().velocity.magnitude;
             if(speed > 5) {
                 health -= speed;
@@ -138,6 +158,6 @@ public class Control : MonoBehaviour {
 
     public void ResetHealth()
     {
-        health = 100;
+        health = MAX_HEALTH;
     }
 }
