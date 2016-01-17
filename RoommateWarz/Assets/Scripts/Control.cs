@@ -145,7 +145,7 @@ public class Control : MonoBehaviour {
     void OnCollisionEnter2D(Collision2D collision) {
         Collider2D collider = collision.collider;
         string[] tags = collider.tag.Split(':');
-        if (tags.Length > 1 && tags[0] == "Bullet"/* && tags[1] != playerNum.ToString()*/) {
+        if (tags.Length > 1 && tags[0] == "Bullet" && tags[1] != playerNum.ToString()) {
             float speed = collider.GetComponent<Rigidbody2D>().velocity.magnitude;
             if(speed > 5) {
                 health -= speed;
