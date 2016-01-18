@@ -133,6 +133,7 @@ public class Control : MonoBehaviour {
             direction.Normalize();
             direction *= spawndist;
             GameObject bullet = (GameObject)Instantiate(bulletType, transform.position + direction, new Quaternion());
+			bullet.transform.rotation = Quaternion.LookRotation(transform.forward, direction);
             bullet.tag = "Bullet:" + playerNum;
 
             Rigidbody2D bulletBody = bullet.GetComponent<Rigidbody2D>();
