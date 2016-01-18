@@ -2,10 +2,20 @@
 using System.Collections;
 
 public class Control : MonoBehaviour {
-	private const float HEALTH_BAR_HEIGHT = 5f;
-	private const float HEALTH_BAR_WIDTH = 100f;
-	private const float HEALTH_BAR_HORIZONTAL_OFFSET = 50f;
-	private const float HEALTH_BAR_VERTICAL_OFFSET = 0.6f;
+	static class HealthBar {
+		public static float WIDTH {
+			get { return 100f; }
+		}
+		public static float HEIGHT {
+			get { return 5f; }
+		}
+		public static float X_OFFSET {
+			get { return 50f; }
+		}
+		public static float Y_OFFSET {
+			get { return 0.6f; }
+		}
+	}
 	private const float MAX_HEALTH = 100f;
 	private Animator    anim;
 	private bool        didFire = false;
@@ -31,19 +41,28 @@ public class Control : MonoBehaviour {
     }
 
 	void OnGUI() {
-		Vector3 worldPosition = new Vector3(transform.position.x, transform.position.y + HEALTH_BAR_VERTICAL_OFFSET, transform.position.z);
+		#region Health Bar
+		// Find the players screen position
+		Vector3 worldPosition = new Vector3(transform.position.x, transform.position.y + HealthBar.Y_OFFSET, transform.position.z);
 		Vector3 screenPosition = Camera.main.WorldToScreenPoint(worldPosition);
+
+		// Adjust for zoom
+		float screenOffset = 2.7f / Camera.main.orthographicSize;
+		Rect healthBarPosition = new Rect() {
+			x = screenPosition.x - HealthBar.X_OFFSET * screenOffset,
+			y = Screen.height - screenPosition.y - HealthBar.Y_OFFSET * screenOffset,
+			width = HealthBar.WIDTH * screenOffset,
+			height = HealthBar.HEIGHT
+		};
+
+		// Change color from green to red as player loses health
 		float green = health / MAX_HEALTH;
 		float red = 1f - green;
-		float screenOffset = 2.7f / Camera.main.orthographicSize;
         GUI.color = new Color(red, green, 0f);
-		Rect healthBarPosition = new Rect() {
-			x = screenPosition.x - HEALTH_BAR_HORIZONTAL_OFFSET * screenOffset,
-			y = Screen.height - screenPosition.y - HEALTH_BAR_VERTICAL_OFFSET * screenOffset,
-			width = HEALTH_BAR_WIDTH * screenOffset,
-			height = 0
-		};
+		
+		// Draw to screen
 		GUI.HorizontalScrollbar(healthBarPosition, 0, health, 0, MAX_HEALTH);
+		#endregion
 	}
 
 	void Update() {
@@ -62,53 +81,42 @@ public class Control : MonoBehaviour {
         float x = Input.GetAxis("Horizontal"+playerNum),
               y = Input.GetAxis("Vertical"+playerNum);
 
-        //animations
-        if(x == 0 && y == 0)
-        {
+        // Animations
+        if (x == 0 && y == 0) {
             anim.SetBool("walking", false);
         }
-        else
-        {
-            if (!anim.GetBool("walking"))
-            {
+        else {
+            if (!anim.GetBool("walking")) {
                 anim.SetBool("walking", true);
             }
-            if(Mathf.Abs(y) > Mathf.Abs(x))
-            {
-                if(y < 0 && anim.GetInteger("direction") != 0)
-                {
+            if (Mathf.Abs(y) > Mathf.Abs(x)) {
+                if (y < 0 && anim.GetInteger("direction") != 0) {
                     anim.SetInteger("direction", 0);
                 }
-                else if(y > 0 && anim.GetInteger("direction") != 2)
-                {
+                else if (y > 0 && anim.GetInteger("direction") != 2) {
                     anim.SetInteger("direction", 2);
                 }
             }
-            else
-            {
-                if (x < 0 && anim.GetInteger("direction") != 1)
-                {
-                    anim.SetInteger("direction", 1);
-                }
-                else if(x > 0 && anim.GetInteger("direction") != 3)
-                {
-                    anim.SetInteger("direction", 3);
-                }
+            else if (x < 0 && anim.GetInteger("direction") != 1) {
+				anim.SetInteger("direction", 1);
             }
-        }
+			else if (x > 0 && anim.GetInteger("direction") != 3) {
+				anim.SetInteger("direction", 3);
+			}
+		}
 
-        //Movement
-        if(x != 0 || y != 0) {
+        // Movement
+        if (x != 0 || y != 0) {
             body.velocity = new Vector2(x, y) * speed;
         }
-        else if(body.velocity.x != 0 || body.velocity.y != 0){
+        else if (body.velocity.x != 0 || body.velocity.y != 0) {
             body.velocity /= 2;
-            if(body.velocity.x < .01 && body.velocity.y < .01) {
+            if (body.velocity.x < .01 && body.velocity.y < .01) {
                 body.velocity *= 0;
             }
         }
 
-        //Fireing
+        // Firing
         float fire = Input.GetAxis("Fire"+playerNum);
         if (fire > 0 && (!didFire || cooldown == 0)) {
             didFire = true;
@@ -116,7 +124,7 @@ public class Control : MonoBehaviour {
             float aimX = Input.GetAxis("AimHorizontal" + playerNum),
                   aimY = Input.GetAxis("AimVertical" + playerNum);
 
-			//don't fire without direction
+			// don't fire without direction
 			if (aimX == 0 && aimY == 0) {
                 return;
             }
@@ -125,7 +133,6 @@ public class Control : MonoBehaviour {
             direction.Normalize();
             direction *= spawndist;
             GameObject bullet = (GameObject)Instantiate(bulletType, transform.position + direction, new Quaternion());
-
             bullet.tag = "Bullet:" + playerNum;
 
             Rigidbody2D bulletBody = bullet.GetComponent<Rigidbody2D>();
@@ -136,16 +143,23 @@ public class Control : MonoBehaviour {
         else if (fire == 0 && didFire) {
             didFire = false;
         }
-        else if (didFire && cooldown > 0)
-        {
+        else if (didFire && cooldown > 0) {
             --cooldown;
         }
     }
 
     void OnCollisionEnter2D(Collision2D collision) {
         Collider2D collider = collision.collider;
+		// Handle bullet collisions
         string[] tags = collider.tag.Split(':');
-        if (tags.Length > 1 && tags[0] == "Bullet" && tags[1] != playerNum.ToString()) {
+		if (tags.Length <= 1) {
+			return;
+		}
+
+		// Avoid collisions with own bullets
+		bool isBullet = (tags[0] == "Bullet");
+		bool isPlayersBullet = (tags[1] == playerNum.ToString());
+		if (isBullet && !isPlayersBullet) { 
             float speed = collider.GetComponent<Rigidbody2D>().velocity.magnitude;
             if(speed > 5) {
                 health -= speed;
@@ -156,8 +170,7 @@ public class Control : MonoBehaviour {
         }
     }
 
-    public void ResetHealth()
-    {
+    public void ResetHealth() {
         health = MAX_HEALTH;
     }
 }
