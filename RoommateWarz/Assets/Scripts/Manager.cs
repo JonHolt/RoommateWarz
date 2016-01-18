@@ -2,58 +2,62 @@
 using System.Collections;
 
 public class Manager : MonoBehaviour {
-    public GameObject player;
-    public RuntimeAnimatorController animation1;
-    public RuntimeAnimatorController animation2;
+    public GameObject[] characters;
     public Follow cam;
-    GameObject player1, player2, player3, player4;
+    GameObject[] players;
+    const int MAX_PLAYERS = 4;
 	
+    void Awake()
+    {
+        players = new GameObject[MAX_PLAYERS];
+    }
 	// Update is called once per frame
 	void Update() {
         #region startPressed
         if (Input.GetButton("Start1")) {
-            if (player1 == null) {
-				// Initialize player 1
-                player1 = Instantiate(player);
-                player1.GetComponent<Control>().playerNum = 1;
-                player1.GetComponent<Animator>().runtimeAnimatorController = animation1;
-				player1.transform.position = GetSpawnPoint(player1.transform.position);
-                cam.following[0] = player1.transform;
-            }
-            else if (!player1.activeSelf) {
-				// Respawn player 1
-                player1.SetActive(true);
-                player1.GetComponent<Control>().ResetHealth();
-				player1.transform.position = GetSpawnPoint(player1.transform.position);
-				cam.following[0] = player1.transform;
-            }
+            ActivatePlayer(0);
         }
         if (Input.GetButton("Start2")) {
-            if (player2 == null) {
-				// Initialize player 2
-				player2 = Instantiate(player);
-                player2.GetComponent<Control>().playerNum = 2;
-                player2.GetComponent<Animator>().runtimeAnimatorController = animation2;
-				player2.transform.position = GetSpawnPoint(player2.transform.position);
-				cam.following[1] = player2.transform;
-            }
-            else if (!player2.activeSelf) {
-				// Respawn player 2
-				player2.SetActive(true);
-                player2.GetComponent<Control>().ResetHealth();
-				player2.transform.position = GetSpawnPoint(player2.transform.position);
-				cam.following[1] = player2.transform;
-            }
+            ActivatePlayer(1);
+        }
+        if (Input.GetButton("Start3"))
+        {
+            ActivatePlayer(2);
+        }
+        if (Input.GetButton("Start4"))
+        {
+            ActivatePlayer(3);
         }
         #endregion
         #region notActive
-        if (player1 && !player1.activeSelf) {
-            cam.following[0] = null;
-        }
-        if (player2 && !player2.activeSelf) {
-            cam.following[1] = null;
+        for(int i = 0; i < MAX_PLAYERS; ++i)
+        {
+            if (players[i] && !players[i].activeSelf)
+            {
+                cam.following[i] = null;
+            }
         }
         #endregion
+    }
+
+    void ActivatePlayer(int playerNum)
+    {
+        if (players[playerNum] == null)
+        {
+            // Initialize player
+            players[playerNum] = Instantiate(characters[playerNum % characters.Length]);
+            players[playerNum].GetComponent<Control>().playerNum = playerNum + 1;
+            players[playerNum].transform.position = GetSpawnPoint(players[playerNum].transform.position);
+            cam.following[playerNum] = players[playerNum].transform;
+        }
+        else if (!players[playerNum].activeSelf)
+        {
+            // Respawn player 1
+            players[playerNum].SetActive(true);
+            players[playerNum].GetComponent<Control>().ResetHealth();
+            players[playerNum].transform.position = GetSpawnPoint(players[playerNum].transform.position);
+            cam.following[playerNum] = players[playerNum].transform;
+        }
     }
 
 	/// <summary>
