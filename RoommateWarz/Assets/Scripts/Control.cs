@@ -118,7 +118,7 @@ public class Control : MonoBehaviour {
 
         // Firing
         float fire = Input.GetAxis("Fire"+playerNum);
-        if (fire > 0 /*&& (!didFire || cooldown == 0)*/) {
+        if (fire > 0 && (!didFire || cooldown == 0)) {
             didFire = true;
 
             float aimX = Input.GetAxis("AimHorizontal" + playerNum),
