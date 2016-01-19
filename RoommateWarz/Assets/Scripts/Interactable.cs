@@ -17,16 +17,16 @@ public class Interactable : MonoBehaviour {
         if (other.tag != "Player")
             return;
         int num = other.gameObject.GetComponent<Control>().playerNum;
-        if (Input.GetButton("Interact1") && num == 1) {
+        if (Input.GetButtonDown("Interact1") && num == 1) {
             interaction.Act(num - 1);
         }
-        if (Input.GetButton("Interact2") && num == 2) {
+        if (Input.GetButtonDown("Interact2") && num == 2) {
             interaction.Act(num - 1);
         }
-        if (Input.GetButton("Interact3") && num == 3) {
+        if (Input.GetButtonDown("Interact3") && num == 3) {
             interaction.Act(num - 1);
         }
-        if (Input.GetButton("Interact4") && num == 4) {
+        if (Input.GetButtonDown("Interact4") && num == 4) {
             interaction.Act(num - 1);
         }
     }
