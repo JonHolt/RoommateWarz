@@ -3,9 +3,9 @@ using System.Collections;
 using System;
 
 public class CycleCharacter : Interaction {
-    Manager manager;
+    OnlineManager manager;
     void Awake() {
-        manager = GetComponent<Manager>();
+        manager = GetComponent<OnlineManager>();
     }
 
     public override void Act(int playerNum) {
