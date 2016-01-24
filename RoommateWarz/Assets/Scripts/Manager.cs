@@ -2,7 +2,9 @@
 using System.Collections;
 
 public class Manager : MonoBehaviour {
-    public GameObject[] characters;
+    public GameObject playerPrefab;
+    public RuntimeAnimatorController[] characters;
+    public GameObject[] bullets;
     public Follow cam;
     public GameObject[] players;
     public int[] characterSelection;
@@ -41,9 +43,13 @@ public class Manager : MonoBehaviour {
         if (players[playerNum] == null) {
             // Initialize player
             characterSelection[playerNum] = playerNum % characters.Length;
-            players[playerNum] = Instantiate(characters[characterSelection[playerNum]]);
+            players[playerNum] = Instantiate(playerPrefab);
             players[playerNum].GetComponent<Control>().playerNum = playerNum + 1;
-            players[playerNum].transform.position = GetSpawnPoint(players[playerNum].transform.position);
+            players[playerNum].transform.position = GetInitialSpawnPoint(players[playerNum].transform.position, playerNum+1);
+            characterSelection[playerNum] = playerNum % characters.Length;
+            Debug.Log(characterSelection[playerNum]);
+            players[playerNum].GetComponent<Animator>().runtimeAnimatorController = characters[characterSelection[playerNum]];
+            players[playerNum].GetComponent<Control>().bulletType = bullets[characterSelection[playerNum]]; 
             cam.following[playerNum] = players[playerNum].transform;
         }
         else if (!players[playerNum].activeSelf) {
@@ -72,5 +78,18 @@ public class Manager : MonoBehaviour {
         // Ensure the player appears at the correct z position
         spawnPoint.z = playerPosition.z;
         return spawnPoint;
+    }
+    Vector3 GetInitialSpawnPoint(Vector3 playerPosition, int playerNum) {
+        Vector3 spawnPoint = Vector3.zero;
+        var spawnPoints = GameObject.FindGameObjectsWithTag("Respawn");
+        foreach(GameObject obj in spawnPoints) {
+            string spawnNum = obj.name.Substring(obj.name.Length - 1);
+            if(spawnNum == playerNum.ToString()) {
+                spawnPoint = obj.transform.position;
+                spawnPoint.z = playerPosition.z;
+                return spawnPoint;
+            }
+        }
+        throw new System.Exception("spawn position for player " + playerNum + " not found.");
     }
 }
