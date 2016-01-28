@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
-
+//useless comment: remove me later
 public class Follow : MonoBehaviour {
 	public Camera cam;
 	public float MINIMUM_SIZE = 2.5f;
